@@ -28,14 +28,14 @@ RECIPIENT_EMAIL = "receiver@example.com"
 
 def filter_records():
     now = datetime.now(timezone.utc)
-    two_weeks_ago = now - timedelta(days=14)
+    one_week_ago = now - timedelta(days=7)
     vulnerabilities = parsed_response.get("vulnerabilities", [])
 
     for vuln in vulnerabilities:
         dateAdded = vuln.get("dateAdded")
         vuln_date = datetime.strptime(
             dateAdded, "%Y-%m-%d").replace(tzinfo=timezone.utc)
-        if two_weeks_ago <= vuln_date <= now:
+        if one_week_ago <= vuln_date <= now:
             recent_records.append(vuln)
 
     return recent_records
@@ -57,11 +57,11 @@ def email_report():
     msg = MIMEMultipart()
     msg["From"] = SENDER_EMAIL
     msg["To"] = RECIPIENT_EMAIL
-    msg["Subject"] = f"Bi-Weekly Automated Report - {time.strftime('%Y-%m-%d')}"
+    msg["Subject"] = f"Weekly Automated Report - {time.strftime('%Y-%m-%d')}"
 
     body = """ Dear Duke,
  I trust you are well.
- Please find attached the bi-weekly vulnerability report from CISA.
+ Please find attached the weekly vulnerability report from CISA.
 
  Best Regards,
  Python Bot."""
@@ -88,9 +88,9 @@ email_report()
 print(f"Email sent successfully to {RECIPIENT_EMAIL}!")
 
 
-schedule.every(2).weeks.monday.at("08:30").do(email_report)
+schedule.every().monday.at("08:30").do(email_report)
 
-print("Bi-weekly Monday email scheduler started. Keep this script running...")
+print("Weekly Monday email scheduler started. Keep this script running...")
 
 while True:
     schedule.run_pending()
